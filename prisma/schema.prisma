@@ -1,0 +1,356 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  SUPPORT
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum QuotationStatus {
+  PENDING
+  APPROVED
+  NOT_INTERESTED
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum DemoMode {
+  ONLINE
+  OFFLINE
+}
+
+model User {
+  id              String           @id @default(cuid())
+  name            String
+  email           String           @unique
+  phone           String?
+  role            Role             @default(AGENT)
+  otp             String?
+  otpExpiresAt    DateTime?
+  avatarUrl       String?
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  assignedLeads   Lead[]           @relation("AgentLeads")
+  quotations      Quotation[]
+  invoices        Invoice[]
+  proposals       Proposal[]
+  sales           Sale[]
+  demos           Demo[]
+  appointments    Appointment[]
+  dataRequests    DataRequest[]
+  createdTickets  SupportTicket[]  @relation("CreatedTickets")
+  assignedTickets SupportTicket[]  @relation("AssignedTickets")
+  ticketMessages  TicketMessage[]
+  loginAudits     LoginAudit[]
+  reminderSetting ReminderSetting?
+}
+
+model LoginAudit {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model LeadStatus {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String   @default("#6c757d")
+  leads     Lead[]
+}
+
+model LeadType {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  leads     Lead[]
+}
+
+model Lead {
+  id             String          @id @default(cuid())
+  name           String
+  company        String?
+  email          String?
+  phone          String
+  city           String?
+  state          String?
+  address        String?
+  source         String?
+  callbackDate   DateTime?
+  notes          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  statusId       String?
+  status         LeadStatus?     @relation(fields: [statusId], references: [id])
+  typeId         String?
+  type           LeadType?       @relation(fields: [typeId], references: [id])
+  assignedToId   String?
+  assignedTo     User?           @relation("AgentLeads", fields: [assignedToId], references: [id])
+
+  remarks        LeadRemark[]
+  quotations     Quotation[]
+  invoices       Invoice[]
+  proposals      Proposal[]
+  sales          Sale[]
+  demos          Demo[]
+  appointments   Appointment[]
+  dataRequests   DataRequest[]
+  supportTickets SupportTicket[]
+}
+
+model LeadRemark {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  note      String
+  createdBy String?
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id          String             @id @default(cuid())
+  name        String
+  hsnCode     String?
+  price       Float              @default(0.0)
+  description String?
+  taxRate     Float              @default(18.0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  quoteItems  QuotationItem[]
+  invItems    InvoiceItem[]
+  proposals   Proposal[]
+  demos       Demo[]
+  appointments Appointment[]
+}
+
+model Quotation {
+  id              String          @id @default(cuid())
+  quotationNumber String          @unique
+  leadId          String
+  lead            Lead            @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  agentId         String
+  agent           User            @relation(fields: [agentId], references: [id])
+  subject         String          @default("Quotation")
+  offer           String?
+  discount        Float           @default(0.0)
+  subtotal        Float           @default(0.0)
+  gstAmount       Float           @default(0.0)
+  grandTotal      Float           @default(0.0)
+  status          QuotationStatus @default(PENDING)
+  validTill       DateTime?
+  callbackDate    DateTime?
+  termsConditions String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  items           QuotationItem[]
+}
+
+model QuotationItem {
+  id          String    @id @default(cuid())
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product?  @relation(fields: [productId], references: [id])
+  description String
+  quantity    Int       @default(1)
+  rate        Float     @default(0.0)
+  taxRate     Float     @default(18.0)
+  taxable     Float     @default(0.0)
+  gstAmount   Float     @default(0.0)
+  total       Float     @default(0.0)
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  invoiceNumber   String        @unique
+  leadId          String
+  lead            Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  agentId         String
+  agent           User          @relation(fields: [agentId], references: [id])
+  isGst           Boolean       @default(true)
+  status          InvoiceStatus @default(PENDING)
+  subtotal        Float         @default(0.0)
+  gstAmount       Float         @default(0.0)
+  grandTotal      Float         @default(0.0)
+  paymentMode     String?       // UPI, Bank Transfer, Card, Cash
+  transactionId   String?
+  validTill       DateTime?
+  callbackDate    DateTime?
+  termsConditions String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  items           InvoiceItem[]
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  description String
+  quantity    Int      @default(1)
+  rate        Float    @default(0.0)
+  taxRate     Float    @default(18.0)
+  taxable     Float    @default(0.0)
+  gstAmount   Float    @default(0.0)
+  total       Float    @default(0.0)
+}
+
+model Proposal {
+  id               String   @id @default(cuid())
+  leadId           String
+  lead             Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  agentId          String
+  agent            User     @relation(fields: [agentId], references: [id])
+  productId        String?
+  product          Product? @relation(fields: [productId], references: [id])
+  title            String   @default("Product & Service Rate Chart")
+  offer            String?
+  discount         String   @default("0")
+  message          String?
+  status           String   @default("No Response")
+  proposalType     String   @default("standard")
+  includeRateTable Boolean  @default(true)
+  slabsData        Json     @default("[]") // Multiple dynamic tables with slabs
+  includePackages  Boolean  @default(false)
+  packagesData     Json     @default("[]") // Wallet tier slabs
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Sale {
+  id             String    @id @default(cuid())
+  leadId         String
+  lead           Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  agentId        String
+  agent          User      @relation(fields: [agentId], references: [id])
+  saleDate       DateTime  @default(now())
+  amount         Float     @default(0.0)
+  validity       DateTime?
+  gstNo          String?
+  modeOfPayment  String?
+  isPrepaid      Boolean   @default(true)
+  transactionId  String?
+  targetAudience String?
+  targetLocation String?
+  dltDone        Boolean   @default(false)
+  dltRequired    Boolean   @default(false)
+  remarks        String?
+  createdAt      DateTime  @default(now())
+}
+
+model Demo {
+  id           String    @id @default(cuid())
+  leadId       String
+  lead         Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  agentId      String
+  agent        User      @relation(fields: [agentId], references: [id])
+  productId    String?
+  product      Product?  @relation(fields: [productId], references: [id])
+  demoDateTime DateTime
+  demoMode     DemoMode  @default(ONLINE)
+  quantity     Int       @default(1)
+  price        Float     @default(0.0)
+  createdAt    DateTime  @default(now())
+}
+
+model Appointment {
+  id              String   @id @default(cuid())
+  leadId          String
+  lead            Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  agentId         String
+  agent           User     @relation(fields: [agentId], references: [id])
+  productId       String?
+  product         Product? @relation(fields: [productId], references: [id])
+  appointmentDate DateTime
+  targetAudience  String?
+  targetLocation  String?
+  createdAt       DateTime @default(now())
+}
+
+model DataRequest {
+  id             String   @id @default(cuid())
+  leadId         String
+  lead           Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  agentId        String
+  agent          User     @relation(fields: [agentId], references: [id])
+  dataType       String
+  targetAudience String?
+  targetLocation String?
+  quantity       Int      @default(0)
+  createdAt      DateTime @default(now())
+}
+
+model SupportTicket {
+  id           String          @id @default(cuid())
+  ticketNumber String          @unique
+  leadId       String
+  lead         Lead            @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  createdById  String
+  createdBy    User            @relation("CreatedTickets", fields: [createdById], references: [id])
+  assignedToId String?
+  assignedTo   User?           @relation("AssignedTickets", fields: [assignedToId], references: [id])
+  subject      String
+  description  String
+  priority     Priority        @default(MEDIUM)
+  status       TicketStatus    @default(OPEN)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  messages     TicketMessage[]
+}
+
+model TicketMessage {
+  id        String        @id @default(cuid())
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User          @relation(fields: [senderId], references: [id])
+  message   String
+  createdAt DateTime      @default(now())
+}
+
+model ReminderSetting {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  soundType      String   @default("chime") // chime, bell, beep, synth
+  volume         Int      @default(80)
+  advanceMinutes Int      @default(15)
+  desktopEnabled Boolean  @default(true)
+  updatedAt      DateTime @updatedAt
+}

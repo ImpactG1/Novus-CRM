@@ -1,0 +1,27 @@
+import { NextResponse } from 'next/server';
+import { crmStore } from '@/lib/store';
+
+export async function GET(req: Request, { params }: { params: { id: string } }) {
+  try {
+    const ticket = crmStore.getTicketById(params.id);
+    if (!ticket) {
+      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
+    }
+    return NextResponse.json({ ticket });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+  try {
+    const body = await req.json();
+    const updated = crmStore.updateTicket(params.id, body);
+    if (!updated) {
+      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
+    }
+    return NextResponse.json({ success: true, ticket: updated });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
