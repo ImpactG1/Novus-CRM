@@ -1,7 +1,17 @@
 {
-  "name": "enterprise-crm",
+  "name": "novus-crm",
   "version": "1.0.0",
-  "private": true,
+  "description": "Full-Stack Enterprise CRM in Next.js & Serverless Node.js (100% Free Vercel Hosting)",
+  "private": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ImpactG1/Novus-CRM.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ImpactG1/Novus-CRM/issues"
+  },
+  "homepage": "https://github.com/ImpactG1/Novus-CRM#readme",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",

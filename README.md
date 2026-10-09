@@ -1,6 +1,22 @@
-# Full-Stack Enterprise CRM (Next.js & Serverless Node.js)
+# Novus CRM
 
-An enterprise-grade Customer Relationship Management (CRM) system architected for **100% free hosting** on **Vercel (Hobby Tier)** combined with a free serverless PostgreSQL database (**Neon Serverless Postgres** or **Supabase Free Tier**).
+<p align="center">
+  <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&auto=format&fit=crop&q=80" alt="Novus CRM Banner" width="100%" style="border-radius: 12px;" />
+</p>
+
+<p align="center">
+  <strong>Full-Stack Enterprise Customer Relationship Management (CRM) System</strong><br/>
+  Architected for <strong>100% Free Hosting</strong> on <strong>Vercel (Hobby Tier)</strong> & Serverless PostgreSQL (<strong>Neon</strong> / <strong>Supabase</strong>).
+</p>
+
+<p align="center">
+  <a href="https://github.com/ImpactG1/Novus-CRM/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" /></a>
+  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-14%20App%20Router-black?logo=next.js" alt="Next.js 14" /></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript" alt="TypeScript" /></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind-3.x-38bdf8?logo=tailwind-css" alt="Tailwind CSS" /></a>
+  <a href="https://www.prisma.io"><img src="https://img.shields.io/badge/Prisma-5.x-2d3748?logo=prisma" alt="Prisma ORM" /></a>
+  <a href="https://github.com/ImpactG1/Novus-CRM/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" /></a>
+</p>
 
 ---
 
@@ -8,7 +24,7 @@ An enterprise-grade Customer Relationship Management (CRM) system architected fo
 
 | Component | Technology | Free Tier Provision |
 |---|---|---|
-| **Frontend & Backend** | Next.js 14 App Router, React 18, TypeScript | Vercel Serverless (Unlimited Free Deployments) |
+| **Frontend & Backend** | Next.js 14 App Router (`/app`), React 18, TypeScript | Vercel Serverless (Unlimited Free Deployments) |
 | **Styling & UI** | Tailwind CSS, Radix UI Primitives, Lucide Icons | Linear & Stripe Dashboard Design System |
 | **Charts & Visuals** | Recharts (Responsive SVG Canvas) | Zero External Dependencies |
 | **Database** | PostgreSQL | Neon Postgres (0.5 GB Free Serverless Storage) |
@@ -76,8 +92,10 @@ An enterprise-grade Customer Relationship Management (CRM) system architected fo
 
 ## 🛠️ Local Quickstart
 
-### 1. Install Dependencies
+### 1. Clone & Install
 ```bash
+git clone https://github.com/ImpactG1/Novus-CRM.git
+cd Novus-CRM
 npm install
 ```
 
@@ -99,7 +117,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Step 1: Create Free PostgreSQL Database (Neon)
 1. Go to [neon.tech](https://neon.tech) and create a free account.
-2. Create a project named `crm-production`.
+2. Create a project named `novus-crm`.
 3. Copy the **Connection String** (Pooled connection for `DATABASE_URL` and Direct for `DIRECT_URL`).
 
 ### Step 2: Push Database Schema
@@ -108,8 +126,8 @@ npx prisma db push
 ```
 
 ### Step 3: Deploy to Vercel (100% Free)
-1. Push your repository to GitHub.
-2. In [Vercel Dashboard](https://vercel.com), click **Add New Project** and select your repository.
+1. Push your repository to GitHub: `https://github.com/ImpactG1/Novus-CRM`
+2. In [Vercel Dashboard](https://vercel.com), click **Add New Project** and select `Novus-CRM`.
 3. In **Environment Variables**, add:
    - `DATABASE_URL`: `postgresql://...` (Pooled connection string)
    - `DIRECT_URL`: `postgresql://...` (Direct connection string)
@@ -118,3 +136,15 @@ npx prisma db push
    - `RESEND_API_KEY`: Your free Resend API key from [resend.com](https://resend.com) (or leave blank for console fallback).
    - `EMAIL_FROM`: `CRM <onboarding@resend.dev>`
 4. Click **Deploy**. Vercel will build and launch your production CRM globally on its Serverless Edge network.
+
+---
+
+## 🤝 Contributing & Community
+
+Contributions are warmly welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, development setup, and the process for submitting pull requests.
+
+---
+
+## 📄 Open Source License
+
+This project is open-source and licensed under the [MIT License](LICENSE). You are free to use, modify, distribute, and build commercial products upon it.
